@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>厦门集美区实时天气</title>
+
+  <link rel="stylesheet" href="/mnt/data/18ec03d5-d340-4a72-a26c-c7118b133a3c.css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    .weather-card{
+      background: linear-gradient(180deg,#0d1224cc,#0b0f1dcc);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:22px;
+      box-shadow:var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+
+    /* ====== 霓虹动画层（更炫版本）====== */
+    .wx-anim{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      z-index:0;
+      opacity:1;
+      overflow:hidden;
+    }
+
+    /* 画布覆盖整个卡片 */
+    #fxCanvas{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
+      opacity:.85;
+      filter: saturate(1.15) contrast(1.05);
+    }
+
+    /* 多层霓虹光晕：所有天气都会有基础能量场 */
+    .wx-anim::before{
+      content:"";
+      position:absolute;
+      inset:-40% -30%;
+      background:
+        radial-gradient(circle at 20% 25%, rgba(0,231,255,.20), transparent 55%),
+        radial-gradient(circle at 80% 35%, rgba(255,43,214,.16), transparent 58%),
+        radial-gradient(circle at 45% 80%, rgba(120,180,255,.10), transparent 60%);
+      filter: blur(16px);
+      animation: energyFloat 7s ease-in-out infinite alternate;
+      opacity:.9;
+    }
+
+    /* 赛博旋转能量环（晴天/多云尤其明显） */
+    .ring{
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:520px;
+      height:520px;
+      transform:translate(-50%,-50%);
+      border-radius:50%;
+      background: conic-gradient(
+        rgba(0,231,255,.0),
+        rgba(0,231,255,.25),
+        rgba(255,43,214,.18),
+        rgba(0,231,255,.0)
+      );
+      filter: blur(6px);
+      opacity:.35;
+      animation: ringSpin 10s linear infinite;
+    }
+
+    /* 云层光雾层（多云/阴/雷暴） */
+    .mist{
+      position:absolute;
+      inset:-30% -30%;
+      background:
+        radial-gradient(320px 220px at 20% 45%, rgba(210,240,255,.16), transparent 60%),
+        radial-gradient(420px 260px at 65% 55%, rgba(180,230,255,.12), transparent 62%),
+        radial-gradient(360px 240px at 50% 75%, rgba(150,210,255,.10), transparent 62%);
+      filter: blur(14px);
+      opacity:.0;
+      animation: mistDrift 8s ease-in-out infinite alternate;
+    }
+
+    /* 闪电层（雷暴） */
+    .flash{
+      position:absolute;
+      inset:0;
+      background: radial-gradient(circle at 55% 32%, rgba(255,255,255,.95), transparent 35%);
+      mix-blend-mode: screen;
+      opacity:0;
+      animation: flash 4.8s infinite;
+    }
+
+    /* 内容层抬高 */
+    .wx-content{ position:relative; z-index:1; }
+
+    /* ====== 头部居中 + 大标题 ====== */
+    .weather-head{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      margin-bottom:16px;
+    }
+
+    .place-main{
+      width:100%;
+      text-align:center;
+      font-family:"Orbitron", system-ui;
+      font-size:clamp(28px, 4vw, 42px);
+      font-weight:800;
+      letter-spacing:.12em;
+      margin:0 0 6px;
+      color:#dff6ff;
+      text-shadow: 0 0 12px var(--neon-cyan), 0 0 26px rgba(255,43,214,.22);
+    }
+
+    .updated{
+      color:var(--muted);
+      font-size:.9rem;
+      text-align:center;
+      margin-top:2px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid #24406a;
+      background:#0b1326cc;
+      color:#d1eeff;
+      font-weight:700;
+      letter-spacing:.02em;
+      box-shadow: inset 0 0 0 1px rgba(0,231,255,.10);
+      margin-top:6px;
+    }
+
+    .big{
+      display:flex;
+      align-items:baseline;
+      justify-content:center;
+      gap:10px;
+      margin:8px 0 4px;
+    }
+
+    .temp{
+      font-size: clamp(48px, 6vw, 72px);
+      font-weight:800;
+      line-height:1;
+      font-family:"Orbitron",system-ui;
+      text-shadow: 0 0 14px var(--neon-cyan), 0 0 22px rgba(255,43,214,.20);
+    }
+
+    .unit{
+      color:#bfeaff;
+      opacity:.9;
+      font-weight:700;
+      letter-spacing:.06em;
+    }
+
+    .desc{
+      color:var(--muted);
+      margin:6px 0 10px;
+      line-height:1.6;
+      text-align:center;
+    }
+
+    /* 出行建议 */
+    .advice{
+      margin: 10px 0 18px;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid #24406a;
+      background:#0b1326cc;
+      box-shadow: inset 0 0 0 1px rgba(0,231,255,.10);
+      color:#cfefff;
+      line-height:1.65;
+    }
+    .advice b{
+      font-family:"Orbitron",system-ui;
+      letter-spacing:.06em;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap:12px;
+    }
+    @media (max-width:560px){ .grid{ grid-template-columns: 1fr; } }
+
+    .metric{
+      padding:14px 14px;
+      border-radius:14px;
+      border:1px solid #24406a;
+      background:#0b1326cc;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      transition: transform .15s ease, border-color .15s ease, background .15s ease;
+    }
+    .metric:hover{
+      transform: translateY(-2px);
+      border-color:#4ac8ff;
+      background:#0e1a33;
+    }
+    .metric .k{ color:#8db3cc; font-size:.9rem; }
+    .metric .v{ color:#d1eeff; font-weight:800; letter-spacing:.02em; }
+
+    .actions{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:16px;
+      justify-content:center;
+    }
+    .btn{
+      cursor:pointer;
+      border:1px solid #24406a;
+      background:#0b1326cc;
+      color:#d1eeff;
+      border-radius:12px;
+      padding:10px 14px;
+      font-weight:800;
+      letter-spacing:.03em;
+      transition:.15s;
+      box-shadow: inset 0 0 0 1px rgba(0,231,255,.10);
+    }
+    .btn:hover{ transform: translateY(-2px); border-color:#4ac8ff; background:#0e1a33; }
+    .btn:active{ transform: translateY(0); }
+
+    .status{
+      margin-top:10px;
+      color:#9fb5c6;
+      font-size:.9rem;
+      text-align:center;
+    }
+
+    /* ===== 动画关键帧 ===== */
+    @keyframes energyFloat{
+      from{ transform: translate(-2%, -1%) scale(1); }
+      to  { transform: translate(2%, 1%) scale(1.05); }
+    }
+    @keyframes ringSpin{
+      from{ transform:translate(-50%,-50%) rotate(0deg); }
+      to  { transform:translate(-50%,-50%) rotate(360deg); }
+    }
+    @keyframes mistDrift{
+      from{ transform: translateX(-4%); }
+      to  { transform: translateX(4%); }
+    }
+    @keyframes flash{
+      0%,92%,100%{ opacity:0; }
+      93%{ opacity:.90; }
+      95%{ opacity:.22; }
+      97%{ opacity:.95; }
+    }
+
+    /* ====== 按天气增强不同层 ====== */
+    .wx-clear .ring{ opacity:.48; }
+    .wx-clouds .ring{ opacity:.34; }
+    .wx-overcast .ring{ opacity:.18; }
+    .wx-rain .ring{ opacity:.22; filter: blur(8px); }
+    .wx-snow .ring{ opacity:.20; filter: blur(9px); }
+    .wx-fog  .ring{ opacity:.12; filter: blur(10px); }
+    .wx-thunder .ring{ opacity:.16; filter: blur(10px); }
+
+    .wx-clouds .mist{ opacity:.55; }
+    .wx-overcast .mist{ opacity:.70; }
+    .wx-thunder .mist{ opacity:.78; }
+
+    .wx-thunder .flash{ display:block; }
+    .flash{ display:none; }
+  </style>
+</head>
+
+<body>
+  <div class="bg fx-grid"></div>
+  <div class="bg fx-noise"></div>
+  <div class="bg fx-scanline"></div>
+
+  <main class="container">
+    <section class="hero-card">
+      <div class="weather-card" aria-live="polite">
+        <!-- ✅ 更炫动画层：canvas + 霓虹环 + 雾层 + 雷暴闪光 -->
+        <div class="wx-anim wx-clear" id="wxAnim">
+          <canvas id="fxCanvas"></canvas>
+          <div class="ring"></div>
+          <div class="mist"></div>
+          <div class="flash"></div>
+        </div>
+
+        <div class="wx-content">
+          <div class="weather-head">
+            <h1 class="place-main">厦门 · 集美区</h1>
+            <div class="updated" id="updatedText">正在获取最新天气…</div>
+            <div class="pill" id="badge">● 加载中</div>
+          </div>
+
+          <div class="big">
+            <div class="temp" id="temp">--</div>
+            <div class="unit">°C</div>
+          </div>
+
+          <div class="desc" id="desc">请稍候，正在加载实时天气信息。</div>
+
+          <div class="advice" id="advice"><b>出行建议：</b>正在生成建议…</div>
+
+          <div class="grid" id="metrics">
+            <div class="metric"><span class="k">体感温度</span><span class="v" id="apparent">-- °C</span></div>
+            <div class="metric"><span class="k">风速</span><span class="v" id="wind">-- km/h</span></div>
+            <div class="metric"><span class="k">湿度</span><span class="v" id="humidity">-- %</span></div>
+            <div class="metric"><span class="k">气压</span><span class="v" id="pressure">-- hPa</span></div>
+            <div class="metric"><span class="k">降水</span><span class="v" id="precip">-- mm</span></div>
+            <div class="metric"><span class="k">云量</span><span class="v" id="cloud">-- %</span></div>
+            <div class="metric"><span class="k">能见度</span><span class="v" id="visibility">-- km</span></div>
+            <div class="metric"><span class="k">UV 指数</span><span class="v" id="uv">--</span></div>
+          </div>
+
+          <div class="actions">
+            <button class="btn" id="refreshBtn" type="button">手动刷新</button>
+            <button class="btn" id="toggleAutoBtn" type="button">自动刷新：开启</button>
+          </div>
+
+          <div class="status" id="status"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    © <span id="year"></span> Xiamen Jimei Weather · Cyber UI
+  </footer>
+
+  <script>
+    const LAT = 24.58;
+    const LON = 118.10;
+
+    let autoRefresh = true;
+    let timer = null;
+    const AUTO_INTERVAL_MS = 5 * 60 * 1000;
+
+    const el = (id) => document.getElementById(id);
+    const tempEl = el("temp");
+    const descEl = el("desc");
+    const badgeEl = el("badge");
+    const updatedEl = el("updatedText");
+    const statusEl = el("status");
+    const adviceEl = el("advice");
+    const animEl = el("wxAnim");
+
+    const apparentEl = el("apparent");
+    const windEl = el("wind");
+    const humidityEl = el("humidity");
+    const pressureEl = el("pressure");
+    const precipEl = el("precip");
+    const cloudEl = el("cloud");
+    const visibilityEl = el("visibility");
+    const uvEl = el("uv");
+
+    const refreshBtn = el("refreshBtn");
+    const toggleAutoBtn = el("toggleAutoBtn");
+
+    function weatherText(code) {
+      const map = {
+        0: "晴朗", 1: "大致晴", 2: "多云", 3: "阴天",
+        45: "雾", 48: "雾凇",
+        51: "毛毛雨（弱）", 53: "毛毛雨（中）", 55: "毛毛雨（强）",
+        56: "冻毛毛雨（弱）", 57: "冻毛毛雨（强）",
+        61: "小雨", 63: "中雨", 65: "大雨",
+        66: "冻雨（弱）", 67: "冻雨（强）",
+        71: "小雪", 73: "中雪", 75: "大雪", 77: "雪粒",
+        80: "阵雨（弱）", 81: "阵雨（中）", 82: "阵雨（强）",
+        85: "阵雪（弱）", 86: "阵雪（强）",
+        95: "雷暴", 96: "雷暴伴随冰雹（弱）", 99: "雷暴伴随冰雹（强）",
+      };
+      return map[code] ?? `未知天气（code ${code}）`;
+    }
+
+    function windDirText(deg) {
+      if (deg == null || Number.isNaN(deg)) return "";
+      const dirs = ["北", "东北", "东", "东南", "南", "西南", "西", "西北"];
+      const i = Math.round(deg / 45) % 8;
+      return dirs[i];
+    }
+
+    function fmt(n, digits = 0) {
+      if (n == null || Number.isNaN(n)) return "--";
+      return Number(n).toFixed(digits);
+    }
+
+    function setBadge(text, mode = "ok") {
+      badgeEl.textContent = text;
+      if (mode === "ok") {
+        badgeEl.style.borderColor = "#24406a";
+        badgeEl.style.boxShadow = "inset 0 0 0 1px rgba(0,231,255,.10)";
+      } else if (mode === "warn") {
+        badgeEl.style.borderColor = "#ff2bd655";
+        badgeEl.style.boxShadow = "0 0 18px rgba(255,43,214,.22)";
+      } else {
+        badgeEl.style.borderColor = "#8a6bff55";
+        badgeEl.style.boxShadow = "0 0 18px rgba(138,107,255,.22)";
+      }
+    }
+
+    // ========= 更炫：Canvas 粒子引擎（按天气切换） =========
+    const canvas = document.getElementById("fxCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let fxMode = "clear";
+    let fxWind = 0;
+    let fxIntensity = 1; // 1~3
+    let dpr = Math.max(1, window.devicePixelRatio || 1);
+
+    const particles = [];
+    const sparks = [];
+
+    function resizeCanvas(){
+      const r = canvas.getBoundingClientRect();
+      canvas.width = Math.round(r.width * dpr);
+      canvas.height = Math.round(r.height * dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+    window.addEventListener("resize", resizeCanvas);
+
+    function rand(a,b){ return a + Math.random()*(b-a); }
+
+    function spawn(){
+      const w = canvas.getBoundingClientRect().width;
+      const h = canvas.getBoundingClientRect().height;
+
+      const count = Math.floor(6 * fxIntensity);
+
+      if (fxMode === "rain" || fxMode === "thunder"){
+        for (let i=0;i<count*3;i++){
+          particles.push({
+            x: rand(-20, w+20),
+            y: rand(-h, 0),
+            vx: rand(0.5, 1.4) + fxWind*0.03,
+            vy: rand(8, 14) + fxIntensity*1.8,
+            len: rand(10, 22),
+            a: rand(0.15, 0.32)
+          });
+        }
+      } else if (fxMode === "snow"){
+        for (let i=0;i<count*2;i++){
+          particles.push({
+            x: rand(-20, w+20),
+            y: rand(-h, 0),
+            vx: rand(-0.6, 0.8) + fxWind*0.02,
+            vy: rand(1.2, 2.6) + fxIntensity*0.2,
+            r: rand(0.8, 2.2),
+            tw: rand(0.004, 0.012),
+            t: rand(0, 999)
+          });
+        }
+      } else if (fxMode === "fog" || fxMode === "clouds" || fxMode === "overcast"){
+        for (let i=0;i<count;i++){
+          particles.push({
+            x: rand(-60, w+60),
+            y: rand(0, h),
+            vx: rand(0.15, 0.45) + fxWind*0.01,
+            vy: rand(-0.05, 0.05),
+            r: rand(60, 140),
+            a: rand(0.03, 0.08)
+          });
+        }
+      } else if (fxMode === "clear"){
+        // 霓虹星尘
+        for (let i=0;i<count;i++){
+          particles.push({
+            x: rand(0, w),
+            y: rand(0, h),
+            vx: rand(-0.12, 0.12),
+            vy: rand(-0.10, 0.10),
+            r: rand(0.6, 1.6),
+            a: rand(0.10, 0.22),
+            tw: rand(0.006, 0.016),
+            t: rand(0, 999)
+          });
+        }
+      }
+    }
+
+    function lightning(){
+      if (fxMode !== "thunder") return;
+      // 少量电弧火花（不依赖颜色指定也会很亮，因为混合+白色）
+      const w = canvas.getBoundingClientRect().width;
+      const h = canvas.getBoundingClientRect().height;
+      const x0 = rand(w*0.35, w*0.7);
+      const y0 = rand(0, h*0.25);
+
+      for (let i=0;i<18;i++){
+        sparks.push({
+          x: x0 + rand(-12,12),
+          y: y0 + rand(-8,8),
+          vx: rand(-2.5,2.5),
+          vy: rand(0.8,4.5),
+          life: rand(12, 26),
+          a: rand(0.25, 0.6)
+        });
+      }
+    }
+
+    let lastLightning = 0;
+
+    function step(){
+      const w = canvas.getBoundingClientRect().width;
+      const h = canvas.getBoundingClientRect().height;
+
+      ctx.clearRect(0,0,w,h);
+
+      // 每帧补充一点粒子，保持持续性
+      if (particles.length < 380) spawn();
+
+      // 雷暴：偶尔生成电弧火花
+      if (fxMode === "thunder"){
+        const now = performance.now();
+        if (now - lastLightning > rand(1200, 2600)){
+          lastLightning = now;
+          lightning();
+        }
+      }
+
+      // 绘制/更新主粒子
+      for (let i=particles.length-1;i>=0;i--){
+        const p = particles[i];
+
+        if (fxMode === "rain" || fxMode === "thunder"){
+          p.x += p.vx;
+          p.y += p.vy;
+
+          ctx.globalAlpha = p.a;
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p.x - p.vx*1.8, p.y - p.len);
+          ctx.strokeStyle = "rgba(210,245,255,0.95)";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+
+          if (p.y > h+30 || p.x < -40 || p.x > w+40) particles.splice(i,1);
+        }
+
+        else if (fxMode === "snow"){
+          p.t += 1;
+          const tw = (Math.sin(p.t * p.tw) + 1) * 0.5; // 0~1
+          p.x += p.vx + Math.sin(p.t*0.02)*0.15;
+          p.y += p.vy;
+
+          ctx.globalAlpha = 0.12 + tw * 0.35;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+          ctx.fillStyle = "rgba(240,252,255,0.95)";
+          ctx.fill();
+
+          if (p.y > h+20) particles.splice(i,1);
+        }
+
+        else if (fxMode === "fog" || fxMode === "clouds" || fxMode === "overcast"){
+          p.x += p.vx;
+          p.y += p.vy;
+
+          ctx.globalAlpha = p.a;
+          const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+          g.addColorStop(0, "rgba(220,245,255,0.55)");
+          g.addColorStop(1, "rgba(220,245,255,0)");
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+          ctx.fill();
+
+          if (p.x > w+120) p.x = -120;
+        }
+
+        else { // clear
+          p.t += 1;
+          const tw = (Math.sin(p.t * p.tw) + 1) * 0.5;
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.x < 0) p.x = w;
+          if (p.x > w) p.x = 0;
+          if (p.y < 0) p.y = h;
+          if (p.y > h) p.y = 0;
+
+          ctx.globalAlpha = p.a + tw*0.22;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+          ctx.fillStyle = "rgba(190,245,255,0.95)";
+          ctx.fill();
+        }
+      }
+
+      // 绘制/更新电弧火花
+      for (let i=sparks.length-1;i>=0;i--){
+        const s = sparks[i];
+        s.x += s.vx;
+        s.y += s.vy;
+        s.vy += 0.12;
+        s.life -= 1;
+
+        ctx.globalAlpha = s.a * Math.max(0, s.life/26);
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, 1.5, 0, Math.PI*2);
+        ctx.fillStyle = "rgba(255,255,255,0.95)";
+        ctx.fill();
+
+        if (s.life <= 0) sparks.splice(i,1);
+      }
+
+      requestAnimationFrame(step);
+    }
+
+    function setFx(mode, windKmh){
+      fxMode = mode;
+      fxWind = windKmh ?? 0;
+
+      // 按天气增强强度（更炫）
+      if (mode === "thunder") fxIntensity = 2.6;
+      else if (mode === "rain") fxIntensity = 2.0;
+      else if (mode === "snow") fxIntensity = 1.6;
+      else if (mode === "fog") fxIntensity = 1.8;
+      else if (mode === "overcast") fxIntensity = 1.5;
+      else if (mode === "clouds") fxIntensity = 1.3;
+      else fxIntensity = 1.1;
+
+      // 清空粒子，避免模式切换混乱
+      particles.length = 0;
+      sparks.length = 0;
+      spawn();
+    }
+
+    // ========= 天气类映射（同时影响CSS层 & Canvas 模式） =========
+    function animClassByCode(code){
+      if ([95,96,99].includes(code)) return "wx-thunder";
+      if ([45,48].includes(code)) return "wx-fog";
+      if ([71,73,75,77,85,86].includes(code)) return "wx-snow";
+      if ([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code)) return "wx-rain";
+      if (code === 3) return "wx-overcast";
+      if (code === 2) return "wx-clouds";
+      if (code === 0 || code === 1) return "wx-clear";
+      return "wx-clouds";
+    }
+    function fxModeByClass(cls){
+      if (cls === "wx-thunder") return "thunder";
+      if (cls === "wx-fog") return "fog";
+      if (cls === "wx-snow") return "snow";
+      if (cls === "wx-rain") return "rain";
+      if (cls === "wx-overcast") return "overcast";
+      if (cls === "wx-clouds") return "clouds";
+      return "clear";
+    }
+    function setAnim(code, wind){
+      const cls = animClassByCode(code);
+      animEl.className = `wx-anim ${cls}`;
+      setFx(fxModeByClass(cls), wind);
+    }
+
+    // ========= 出行建议 =========
+    function makeAdvice({ code, temp, wind, precip, uv, visibilityKm }){
+      const tips = [];
+
+      if ([95,96,99].includes(code)) tips.push("尽量避免空旷地/海边停留，注意雷电与突发强降雨。");
+      if ([45,48].includes(code)) tips.push("雾较明显：慢行、开雾灯，骑行注意安全。");
+      if ([71,73,75,77,85,86].includes(code)) tips.push("路面可能湿滑：建议防滑鞋，谨慎驾驶。");
+      if ([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code)) tips.push("建议随身带伞/雨衣，鞋子尽量防水。");
+
+      if (temp != null) {
+        if (temp >= 30) tips.push("体感偏热：轻薄透气，及时补水。");
+        else if (temp <= 12) tips.push("体感偏凉：加外套，早晚保暖。");
+        else tips.push("体感舒适：适合户外活动。");
+      }
+
+      if (wind != null) {
+        if (wind >= 35) tips.push("风较大：减少骑行/高处停留，注意落物。");
+        else if (wind >= 20) tips.push("有风：可备轻薄外套。");
+      }
+
+      if (uv != null) {
+        if (uv >= 8) tips.push("UV 很强：防晒霜+帽子/墨镜，尽量避开正午暴晒。");
+        else if (uv >= 5) tips.push("UV 较强：建议适度防晒。");
+      }
+
+      if (visibilityKm != null && visibilityKm < 3) tips.push("能见度较低：注意车距，避免急刹。");
+      if (precip != null && precip >= 2) tips.push("降水偏多：尽量走有遮挡路线，注意积水。");
+
+      const text = tips.length ? tips.join(" ") : "天气信息不足，建议关注路况并备好雨具/外套。";
+      return `<b>出行建议：</b>${text}`;
+    }
+
+    // ========= 拉取天气 =========
+    async function fetchWeather() {
+      statusEl.textContent = "正在请求 Open-Meteo API…";
+      setBadge("● 获取中", "info");
+
+      const url =
+        "https://api.open-meteo.com/v1/forecast" +
+        `?latitude=${encodeURIComponent(LAT)}` +
+        `&longitude=${encodeURIComponent(LON)}` +
+        "&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m" +
+        "&hourly=relative_humidity_2m,pressure_msl,precipitation,cloud_cover,visibility,uv_index" +
+        "&timezone=Asia%2FShanghai";
+
+      const t0 = performance.now();
+
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) throw new Error("网络请求失败：" + res.status);
+        const data = await res.json();
+
+        const cur = data.current || {};
+        const temp = cur.temperature_2m;
+        const app = cur.apparent_temperature;
+        const code = cur.weather_code;
+        const wind = cur.wind_speed_10m;
+        const windDir = cur.wind_direction_10m;
+        const time = cur.time;
+
+        const hourly = data.hourly || {};
+        const times = hourly.time || [];
+        const idx = times.indexOf(time);
+
+        const humidity = idx >= 0 ? hourly.relative_humidity_2m?.[idx] : null;
+        const pressure = idx >= 0 ? hourly.pressure_msl?.[idx] : null;
+        const precip = idx >= 0 ? hourly.precipitation?.[idx] : null;
+        const cloud = idx >= 0 ? hourly.cloud_cover?.[idx] : null;
+        const visibility = idx >= 0 ? hourly.visibility?.[idx] : null;
+        const uv = idx >= 0 ? hourly.uv_index?.[idx] : null;
+
+        // ✅ 切换“绚丽动效”
+        setAnim(code, wind);
+
+        tempEl.textContent = fmt(temp, 0);
+        apparentEl.textContent = `${fmt(app, 0)} °C`;
+        windEl.textContent = `${fmt(wind, 0)} km/h ${windDirText(windDir)}`;
+        humidityEl.textContent = `${fmt(humidity, 0)} %`;
+        pressureEl.textContent = `${fmt(pressure, 0)} hPa`;
+        precipEl.textContent = `${fmt(precip, 1)} mm`;
+        cloudEl.textContent = `${fmt(cloud, 0)} %`;
+        visibilityEl.textContent = visibility == null ? "-- km" : `${fmt(visibility / 1000, 1)} km`;
+        uvEl.textContent = fmt(uv, 1);
+
+        const text = weatherText(code);
+        descEl.textContent = `${text} · 当前温度 ${fmt(temp, 0)}°C，体感 ${fmt(app, 0)}°C。`;
+
+        const visibilityKm = visibility == null ? null : (visibility / 1000);
+        adviceEl.innerHTML = makeAdvice({ code, temp, wind, precip, uv, visibilityKm });
+
+        const dt = time ? new Date(time) : new Date();
+        updatedEl.textContent = `更新时间：${dt.toLocaleString("zh-CN", { hour12: false })}`;
+
+        const t1 = performance.now();
+        statusEl.textContent = `数据加载成功（耗时 ${Math.round(t1 - t0)} ms）。`;
+        setBadge(`● ${text}`, "ok");
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = "获取失败：可能是网络限制或接口不可用。你可以稍后重试。";
+        descEl.textContent = "当前无法加载实时天气数据。请检查网络或刷新页面。";
+        adviceEl.innerHTML = "<b>出行建议：</b>当前无法生成建议（数据未加载）。";
+        setBadge("● 获取失败", "warn");
+      }
+    }
+
+    function setupAuto() {
+      if (timer) clearInterval(timer);
+      if (autoRefresh) {
+        timer = setInterval(fetchWeather, AUTO_INTERVAL_MS);
+        toggleAutoBtn.textContent = "自动刷新：开启";
+      } else {
+        timer = null;
+        toggleAutoBtn.textContent = "自动刷新：关闭";
+      }
+    }
+
+    refreshBtn.addEventListener("click", fetchWeather);
+    toggleAutoBtn.addEventListener("click", () => {
+      autoRefresh = !autoRefresh;
+      setupAuto();
+    });
+
+    el("year").textContent = new Date().getFullYear();
+
+    // 初始化：先启动动效引擎，再请求数据
+    resizeCanvas();
+    setFx("clear", 0);
+    step();
+
+    fetchWeather();
+    setupAuto();
+  </script>
+</body>
+</html>
