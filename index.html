@@ -146,7 +146,7 @@
       align-items:baseline;
       justify-content:center;
       gap:10px;
-      margin:8px 0 2px;
+      margin:8px 0 4px;
     }
     .temp{
       font-size: clamp(48px, 6vw, 72px);
@@ -160,18 +160,6 @@
       opacity:.9;
       font-weight:700;
       letter-spacing:.06em;
-    }
-
-    /* ✅ 新增：温度范围显示行 */
-    .range-line{
-      text-align:center;
-      color:#9fbbe0;
-      font-family:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size:.92rem;
-      margin-bottom:8px;
-      min-height: 1.2em;
-      opacity:.95;
-      text-shadow: 0 0 10px rgba(0,231,255,.10);
     }
 
     .desc{
@@ -284,12 +272,12 @@
 
     .wx-thunder .flash{ display:block; }
 
-    /* =========================================================
-       ✅ 新增功能 1：未来 7 天按钮 + 详情面板（暗黑科技风）
-       ========================================================= */
+    /* ===========================
+       ✅ 新增：7天日期切换 UI
+    ============================ */
     .forecast-wrap{
       margin-top:14px;
-      padding:14px 14px 12px;
+      padding:14px;
       border-radius:16px;
       border:1px solid #24406a;
       background:#0b1326cc;
@@ -302,184 +290,201 @@
       gap:10px;
       margin-bottom:10px;
     }
-    .forecast-title h2{
-      margin:0;
-      font-size:1rem;
-      color:#d1eeff;
-      letter-spacing:.06em;
+    .forecast-title .h{
       font-family:"Orbitron",system-ui;
-      text-shadow: 0 0 12px rgba(0,231,255,.14);
-    }
-    .mini-btn{
-      cursor:pointer;
-      border:1px solid #24406a;
-      background:#091126cc;
       color:#d1eeff;
-      border-radius:10px;
-      padding:8px 10px;
+      letter-spacing:.08em;
+      font-weight:800;
+    }
+    .mode-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid #24406a;
+      background:#0b1326cc;
+      color:#bfeaff;
       font-weight:800;
       letter-spacing:.03em;
-      transition:.15s;
       box-shadow: inset 0 0 0 1px rgba(0,231,255,.10);
-      font-size:.92rem;
+      font-size:.86rem;
+      white-space:nowrap;
     }
-    .mini-btn:hover{ transform: translateY(-2px); border-color:#4ac8ff; background:#0e1a33; }
-    .mini-btn:active{ transform: translateY(0); }
 
-    .day-buttons{
+    .day-tabs{
       display:flex;
-      flex-wrap:wrap;
       gap:10px;
+      flex-wrap:wrap; /* ✅ 移动端自适应换行 */
       justify-content:center;
-      margin: 8px 0 10px;
+      margin: 6px 0 12px;
     }
     .day-btn{
       cursor:pointer;
       border:1px solid #24406a;
-      background:#091126cc;
+      background:#081022cc;
       color:#d1eeff;
-      border-radius:12px;
+      border-radius:14px;
       padding:10px 12px;
       font-weight:800;
       letter-spacing:.02em;
       transition:.15s;
       box-shadow: inset 0 0 0 1px rgba(0,231,255,.10);
-      display:flex;
-      align-items:center;
-      gap:8px;
-      white-space:nowrap;
-      user-select:none;
-      font-size:.92rem;
+      min-width: 132px;
+      text-align:center;
+      position:relative;
+      overflow:hidden;
     }
     .day-btn:hover{
       transform: translateY(-2px);
       border-color:#4ac8ff;
       background:#0e1a33;
     }
+    .day-btn:active{ transform: translateY(0); }
+    .day-btn .d{
+      font-family:"Orbitron",system-ui;
+      letter-spacing:.06em;
+      font-weight:900;
+      font-size:.95rem;
+      display:block;
+      margin-bottom:4px;
+      color:#e4fbff;
+      text-shadow: 0 0 10px rgba(0,231,255,.20);
+    }
+    .day-btn .s{
+      display:block;
+      color:#9fb5c6;
+      font-size:.86rem;
+      font-weight:700;
+    }
+    /* ✅ 激活状态样式 */
     .day-btn.active{
-      border-color: rgba(0,231,255,.85);
-      background: linear-gradient(180deg, rgba(0,231,255,.10), rgba(255,43,214,.08));
+      border-color:#4ac8ff;
+      background: linear-gradient(180deg, rgba(0,231,255,.10), rgba(255,43,214,.06));
       box-shadow:
-        0 0 22px rgba(0,231,255,.20),
-        inset 0 0 0 1px rgba(0,231,255,.18);
+        0 0 18px rgba(0,231,255,.18),
+        0 0 26px rgba(255,43,214,.12),
+        inset 0 0 0 1px rgba(0,231,255,.16);
+      transform: translateY(-1px);
     }
-    .day-dot{
-      width:8px;height:8px;border-radius:999px;
-      background: rgba(0,231,255,.85);
-      box-shadow: 0 0 12px rgba(0,231,255,.30);
-      flex: 0 0 auto;
-    }
-    .day-btn.active .day-dot{
-      background: rgba(255,43,214,.92);
-      box-shadow: 0 0 14px rgba(255,43,214,.32);
+    .day-btn.active::after{
+      content:"";
+      position:absolute;
+      inset:-40% -30%;
+      background:
+        radial-gradient(circle at 25% 35%, rgba(0,231,255,.18), transparent 55%),
+        radial-gradient(circle at 75% 60%, rgba(255,43,214,.12), transparent 60%);
+      filter: blur(14px);
+      opacity:.9;
+      pointer-events:none;
     }
 
-    /* =========================================================
-       ✅ 新增功能 2：7 天折线图（霓虹暗黑风 + Hover 提示）
-       ========================================================= */
-    .trend-card{
+    .detail-grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap:12px;
+      margin-top:10px;
+    }
+    @media (max-width:560px){ .detail-grid{ grid-template-columns: 1fr; } }
+
+    .detail-head{
+      text-align:center;
+      margin: 4px 0 10px;
+      color:#cfefff;
+      line-height:1.55;
+    }
+    .detail-head b{
+      font-family:"Orbitron",system-ui;
+      letter-spacing:.06em;
+      color:#e4fbff;
+    }
+
+    /* ===========================
+       ✅ 新增：7天折线图（Canvas）
+    ============================ */
+    .chart-card{
       margin-top:16px;
       border-radius:18px;
       border:1px solid #24406a;
-      background:#0b1326cc;
-      box-shadow: inset 0 0 0 1px rgba(0,231,255,.10), var(--shadow);
-      padding:14px 14px 10px;
-      position:relative;
+      background: linear-gradient(180deg,#0d1224cc,#0b0f1dcc);
+      box-shadow: var(--shadow);
       overflow:hidden;
+      position:relative;
     }
-    .trend-head{
+    .chart-head{
+      padding:14px 16px 10px;
       display:flex;
-      align-items:center;
+      align-items:flex-end;
       justify-content:space-between;
-      gap:10px;
-      margin-bottom:10px;
+      gap:12px;
+      border-bottom: 1px solid rgba(36,64,106,.55);
+      background: rgba(11,19,38,.55);
     }
-    .trend-head h2{
-      margin:0;
-      font-size:1rem;
-      color:#d1eeff;
-      letter-spacing:.06em;
+    .chart-head .title{
       font-family:"Orbitron",system-ui;
-      text-shadow: 0 0 12px rgba(0,231,255,.14);
+      color:#dff6ff;
+      letter-spacing:.10em;
+      font-weight:900;
+      text-shadow: 0 0 12px rgba(0,231,255,.20);
     }
-    .legend{
+    .chart-head .legend{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
       justify-content:flex-end;
-      font-size:.86rem;
       color:#9fb5c6;
-      user-select:none;
+      font-size:.86rem;
+      font-weight:800;
     }
-    .lg{
-      display:flex; align-items:center; gap:8px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid #24406a;
-      background:#091126cc;
-      box-shadow: inset 0 0 0 1px rgba(0,231,255,.08);
+    .legend .dot{
+      width:10px;height:10px;border-radius:50%;
+      display:inline-block;margin-right:6px;
+      box-shadow: 0 0 12px rgba(0,231,255,.18);
     }
-    .swatch{
-      width:14px; height:3px; border-radius:99px;
-      background: rgba(0,231,255,.85);
-      box-shadow: 0 0 12px rgba(0,231,255,.22);
-    }
-    .swatch.min{
-      background: rgba(255,43,214,.75);
-      box-shadow: 0 0 12px rgba(255,43,214,.20);
-    }
+    .legend .dot.max{ background: rgba(0,231,255,.95); }
+    .legend .dot.min{ background: rgba(255,43,214,.85); box-shadow: 0 0 12px rgba(255,43,214,.18); }
 
-    .trend-canvas-wrap{
+    .chart-body{
+      padding:10px 12px 12px;
       position:relative;
-      border-radius:14px;
-      border:1px solid #24406a;
-      background: linear-gradient(180deg, rgba(10,18,40,.55), rgba(9,14,30,.55));
-      overflow:hidden;
     }
     #trendCanvas{
       width:100%;
-      height:240px;
+      height:260px;
       display:block;
+      border-radius:14px;
+      background: rgba(9,16,34,.35);
+      border: 1px solid rgba(36,64,106,.45);
+      box-shadow: inset 0 0 0 1px rgba(0,231,255,.06);
     }
     @media (max-width:560px){
-      #trendCanvas{ height: 210px; }
+      #trendCanvas{ height: 240px; }
     }
 
-    .trend-tip{
+    .tooltip{
       position:absolute;
       pointer-events:none;
-      z-index:5;
       transform: translate(-50%, -110%);
       padding:10px 12px;
-      border-radius:12px;
-      border:1px solid rgba(0,231,255,.35);
-      background: rgba(7, 12, 28, .88);
-      box-shadow:
-        0 0 24px rgba(0,231,255,.16),
-        inset 0 0 0 1px rgba(0,231,255,.12);
+      border-radius:14px;
+      border:1px solid rgba(74,200,255,.55);
+      background: rgba(11,19,38,.92);
       color:#d1eeff;
-      font-size:.88rem;
-      line-height:1.45;
-      display:none;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      min-width: 160px;
+      font-weight:800;
+      letter-spacing:.02em;
+      box-shadow: 0 0 18px rgba(0,231,255,.18), 0 0 22px rgba(255,43,214,.10);
+      opacity:0;
+      transition: opacity .08s ease;
+      white-space:nowrap;
+      z-index:3;
     }
-    .trend-tip b{
-      font-family:"Orbitron",system-ui;
-      letter-spacing:.05em;
-    }
-    .trend-tip .row{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
+    .tooltip .sub{
+      display:block;
+      color:#9fb5c6;
+      font-size:.82rem;
+      font-weight:700;
       margin-top:4px;
-      color:#bfeaff;
-      font-family:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
-    .trend-tip .hi{ color: rgba(0,231,255,.95); text-shadow: 0 0 10px rgba(0,231,255,.18); }
-    .trend-tip .lo{ color: rgba(255,43,214,.90); text-shadow: 0 0 10px rgba(255,43,214,.16); }
-
   </style>
 </head>
 
@@ -510,24 +515,9 @@
             <div class="unit">°C</div>
           </div>
 
-          <!-- ✅ 新增：温度范围（预报日显示，高/低；实时默认空） -->
-          <div class="range-line" id="rangeLine"></div>
-
           <div class="desc" id="desc">请稍候，正在加载实时天气信息。</div>
 
           <div class="advice" id="advice"><b>出行建议：</b>正在生成建议…</div>
-
-          <!-- ✅ 新增：未来 7 天日期切换模块 -->
-          <div class="forecast-wrap" id="forecastWrap" aria-label="未来七天天气预报">
-            <div class="forecast-title">
-              <h2>未来 7 天 · 日期切换</h2>
-              <button class="mini-btn" id="backToNowBtn" type="button" title="返回实时天气">返回实时</button>
-            </div>
-            <div class="day-buttons" id="dayButtons">
-              <!-- JS 动态生成 7 天按钮 -->
-            </div>
-            <div class="status" id="forecastStatus">预报模块加载中…</div>
-          </div>
 
           <div class="grid" id="metrics">
             <div class="metric"><span class="k">体感温度</span><span class="v" id="apparent">-- °C</span></div>
@@ -538,32 +528,56 @@
             <div class="metric"><span class="k">云量</span><span class="v" id="cloud">-- %</span></div>
             <div class="metric"><span class="k">能见度</span><span class="v" id="visibility">-- km</span></div>
             <div class="metric"><span class="k">UV 指数</span><span class="v" id="uv">--</span></div>
+          </div>
 
-            <!-- ✅ 新增：预报相关核心指标（在切换到预报日时会填充；实时也可显示为 --） -->
-            <div class="metric"><span class="k">降水概率</span><span class="v" id="pop">-- %</span></div>
-            <div class="metric"><span class="k">最高/最低</span><span class="v" id="hiLo">-- / -- °C</span></div>
+          <!-- ✅ 新增：未来7天日期切换 + 详情展示 -->
+          <div class="forecast-wrap" id="forecastWrap">
+            <div class="forecast-title">
+              <div class="h">未来 7 天预报</div>
+              <div class="mode-pill" id="modePill">当前：实时</div>
+            </div>
+
+            <div class="day-tabs" id="dayTabs">
+              <!-- JS 动态生成 7 个按钮 -->
+            </div>
+
+            <div class="detail-head" id="detailHead">
+              <b>提示：</b>默认展示实时天气。点击上方日期按钮切换查看对应日期预报（不影响粒子特效与整体布局）。
+            </div>
+
+            <div class="detail-grid" id="detailGrid">
+              <div class="metric"><span class="k">温度范围</span><span class="v" id="dTempRange">--</span></div>
+              <div class="metric"><span class="k">天气状况</span><span class="v" id="dWeather">--</span></div>
+              <div class="metric"><span class="k">最大风速</span><span class="v" id="dWindMax">--</span></div>
+              <div class="metric"><span class="k">湿度（均值）</span><span class="v" id="dHumidityAvg">--</span></div>
+              <div class="metric"><span class="k">降水概率</span><span class="v" id="dPrecipProb">--</span></div>
+              <div class="metric"><span class="k">预计降水量</span><span class="v" id="dPrecipSum">--</span></div>
+              <div class="metric"><span class="k">UV 最大值</span><span class="v" id="dUvMax">--</span></div>
+              <div class="metric"><span class="k">能见度（均值）</span><span class="v" id="dVisibilityAvg">--</span></div>
+            </div>
           </div>
 
           <div class="actions">
             <button class="btn" id="refreshBtn" type="button">手动刷新</button>
             <button class="btn" id="toggleAutoBtn" type="button">自动刷新：开启</button>
+            <!-- ✅ 可选：一键回到实时 -->
+            <button class="btn" id="backToLiveBtn" type="button">返回实时</button>
           </div>
 
           <div class="status" id="status"></div>
 
-          <!-- ✅ 新增：7 天折线图（放在网页底部 footer 上方） -->
-          <div class="trend-card" id="trendCard" aria-label="未来七天温度折线图">
-            <div class="trend-head">
-              <h2>未来 7 天 · 温度趋势</h2>
+          <!-- ✅ 新增：7天折线图（位于 footer 上方） -->
+          <div class="chart-card" id="chartCard" aria-label="未来7天温度趋势图">
+            <div class="chart-head">
+              <div class="title">7-DAY TEMP TREND</div>
               <div class="legend">
-                <div class="lg"><span class="swatch"></span><span>最高气温</span></div>
-                <div class="lg"><span class="swatch min"></span><span>最低气温</span></div>
+                <span><i class="dot max"></i>最高气温</span>
+                <span><i class="dot min"></i>最低气温</span>
               </div>
             </div>
-
-            <div class="trend-canvas-wrap" id="trendWrap">
+            <div class="chart-body">
               <canvas id="trendCanvas"></canvas>
-              <div class="trend-tip" id="trendTip"></div>
+              <div class="tooltip" id="tooltip"></div>
             </div>
           </div>
 
@@ -584,15 +598,19 @@
     let timer = null;
     const AUTO_INTERVAL_MS = 5 * 60 * 1000;
 
+    // ✅ 新增：预报/实时切换状态
+    let selectedDayIndex = -1; // -1 = 实时；0..6 = 未来7天中的某天
+    let lastWeatherPayload = null;
+
     const el = (id) => document.getElementById(id);
     const tempEl = el("temp");
-    const rangeLineEl = el("rangeLine");
     const descEl = el("desc");
     const badgeEl = el("badge");
     const updatedEl = el("updatedText");
     const statusEl = el("status");
     const adviceEl = el("advice");
     const animEl = el("wxAnim");
+    const modePillEl = el("modePill");
 
     const apparentEl = el("apparent");
     const windEl = el("wind");
@@ -602,32 +620,29 @@
     const cloudEl = el("cloud");
     const visibilityEl = el("visibility");
     const uvEl = el("uv");
-    const popEl = el("pop");
-    const hiLoEl = el("hiLo");
 
     const refreshBtn = el("refreshBtn");
     const toggleAutoBtn = el("toggleAutoBtn");
+    const backToLiveBtn = el("backToLiveBtn");
 
-    // ✅ 新增 DOM
-    const dayButtonsEl = el("dayButtons");
-    const forecastStatusEl = el("forecastStatus");
-    const backToNowBtn = el("backToNowBtn");
+    // ✅ 新增：预报按钮/详情
+    const dayTabsEl = el("dayTabs");
+    const dTempRangeEl = el("dTempRange");
+    const dWeatherEl = el("dWeather");
+    const dWindMaxEl = el("dWindMax");
+    const dHumidityAvgEl = el("dHumidityAvg");
+    const dPrecipProbEl = el("dPrecipProb");
+    const dPrecipSumEl = el("dPrecipSum");
+    const dUvMaxEl = el("dUvMax");
+    const dVisibilityAvgEl = el("dVisibilityAvg");
+    const detailHeadEl = el("detailHead");
 
-    // ✅ 折线图 DOM
+    // ✅ 新增：折线图
     const trendCanvas = el("trendCanvas");
-    const trendWrap = el("trendWrap");
-    const trendTip = el("trendTip");
-
-    // ✅ 新增：全局缓存（当前 + 7 天）
-    let weatherCache = {
-      current: null,
-      daily: null,
-      hourly: null
-    };
-
-    // ✅ 新增：视图状态（默认实时）
-    let viewMode = "current"; // "current" | "daily"
-    let selectedDayIndex = -1;
+    const tctx = trendCanvas.getContext("2d");
+    const tooltipEl = el("tooltip");
+    let trendDpr = Math.max(1, window.devicePixelRatio || 1);
+    let trendModel = null; // {days:[{date,label,code,desc,tmax,tmin}], minY,maxY, pointsMax[], pointsMin[]}
 
     function weatherText(code) {
       const map = {
@@ -694,6 +709,7 @@
     window.addEventListener("resize", () => {
       resizeCanvas();
       resizeTrendCanvas();
+      drawTrend();
     });
 
     function rand(a,b){ return a + Math.random()*(b-a); }
@@ -969,162 +985,324 @@
       return bestDiff === Infinity ? -1 : best;
     }
 
-    // ✅ 日期格式：1月5日
-    function fmtZhMD(isoDate){
-      // isoDate: YYYY-MM-DD
-      const [y,m,d] = String(isoDate).split("-").map(Number);
-      if (!y || !m || !d) return isoDate;
-      return `${m}月${d}日`;
+    // ✅ 新增：把 yyyy-mm-dd 转成 “1月5日”
+    function formatCNDate(isoDate){
+      const d = new Date(isoDate + "T00:00:00");
+      const m = d.getMonth() + 1;
+      const day = d.getDate();
+      return `${m}月${day}日`;
     }
 
-    // ✅ 从 hourly 数据计算某天平均湿度（%）
-    function calcDailyAvgHumidity(dayIso){
-      const hourly = weatherCache.hourly || {};
-      const times = hourly.time || [];
-      const hum = hourly.relative_humidity_2m || [];
-      let sum = 0, cnt = 0;
+    // ✅ 新增：按日聚合 hourly（用于湿度/能见度等）
+    function aggregateHourlyByDate(hourly){
+      const map = new Map();
+      const times = hourly?.time || [];
+      function pushVal(dateKey, key, v){
+        if (!map.has(dateKey)) map.set(dateKey, {});
+        const obj = map.get(dateKey);
+        if (!Array.isArray(obj[key])) obj[key] = [];
+        if (v != null && Number.isFinite(v)) obj[key].push(v);
+      }
       for (let i=0;i<times.length;i++){
-        if (typeof times[i] === "string" && times[i].startsWith(dayIso)){
-          const v = hum[i];
-          if (v != null && Number.isFinite(Number(v))){
-            sum += Number(v);
-            cnt += 1;
-          }
+        const t = times[i]; // "YYYY-MM-DDTHH:mm"
+        const dateKey = String(t).slice(0,10);
+        pushVal(dateKey, "humidity", hourly?.relative_humidity_2m?.[i]);
+        pushVal(dateKey, "visibility", hourly?.visibility?.[i]);
+      }
+      function avg(arr){
+        if (!arr || !arr.length) return null;
+        let s = 0;
+        for (const x of arr) s += x;
+        return s / arr.length;
+      }
+      const out = new Map();
+      for (const [date, obj] of map.entries()){
+        out.set(date, {
+          humidityAvg: avg(obj.humidity),
+          visibilityAvg: avg(obj.visibility)
+        });
+      }
+      return out;
+    }
+
+    // ✅ 新增：生成 7 天按钮
+    function buildDayTabs(days){
+      dayTabsEl.innerHTML = "";
+      days.forEach((d, i) => {
+        const btn = document.createElement("button");
+        btn.className = "day-btn";
+        btn.type = "button";
+        btn.dataset.index = String(i);
+        btn.innerHTML = `<span class="d">${d.label}</span><span class="s">${d.desc}</span>`;
+        btn.addEventListener("click", () => {
+          selectedDayIndex = i;
+          updateActiveTab();
+          renderByMode(); // 切换展示（不破坏粒子特效）
+        });
+        dayTabsEl.appendChild(btn);
+      });
+      updateActiveTab();
+    }
+
+    function updateActiveTab(){
+      const btns = dayTabsEl.querySelectorAll(".day-btn");
+      btns.forEach((b) => {
+        const i = Number(b.dataset.index);
+        b.classList.toggle("active", i === selectedDayIndex);
+      });
+    }
+
+    function setModePill(){
+      if (selectedDayIndex === -1) {
+        modePillEl.textContent = "当前：实时";
+      } else if (trendModel?.days?.[selectedDayIndex]) {
+        modePillEl.textContent = `当前：${trendModel.days[selectedDayIndex].label} 预报`;
+      } else {
+        modePillEl.textContent = "当前：预报";
+      }
+    }
+
+    // ✅ 折线图：尺寸 & 绘制
+    function resizeTrendCanvas(){
+      const r = trendCanvas.getBoundingClientRect();
+      const w = Math.max(1, r.width);
+      const h = Math.max(1, r.height);
+      trendCanvas.width  = Math.round(w * trendDpr);
+      trendCanvas.height = Math.round(h * trendDpr);
+      tctx.setTransform(trendDpr,0,0,trendDpr,0,0);
+    }
+
+    function buildTrendModel(days){
+      // 取 min/max 用于映射
+      const vals = [];
+      for (const d of days){
+        if (Number.isFinite(d.tmax)) vals.push(d.tmax);
+        if (Number.isFinite(d.tmin)) vals.push(d.tmin);
+      }
+      let minY = Math.min(...vals);
+      let maxY = Math.max(...vals);
+      if (!Number.isFinite(minY) || !Number.isFinite(maxY)) {
+        minY = 0; maxY = 40;
+      }
+      // 留出上下边距
+      const pad = Math.max(2, (maxY - minY) * 0.15);
+      minY -= pad; maxY += pad;
+
+      trendModel = { days, minY, maxY, pointsMax: [], pointsMin: [] };
+    }
+
+    function drawTrend(){
+      if (!trendModel) return;
+      const w = trendCanvas.getBoundingClientRect().width;
+      const h = trendCanvas.getBoundingClientRect().height;
+
+      const padL = 42;
+      const padR = 18;
+      const padT = 20;
+      const padB = 34;
+
+      tctx.clearRect(0,0,w,h);
+
+      // 背景微光网格
+      tctx.save();
+      tctx.globalAlpha = 0.9;
+      // 网格线
+      const gridY = 5;
+      const gridX = 7;
+      for (let i=0;i<=gridY;i++){
+        const y = padT + (h - padT - padB) * (i/gridY);
+        tctx.beginPath();
+        tctx.moveTo(padL, y);
+        tctx.lineTo(w - padR, y);
+        tctx.strokeStyle = "rgba(36,64,106,.35)";
+        tctx.lineWidth = 1;
+        tctx.stroke();
+      }
+      for (let i=0;i<=gridX;i++){
+        const x = padL + (w - padL - padR) * (i/gridX);
+        tctx.beginPath();
+        tctx.moveTo(x, padT);
+        tctx.lineTo(x, h - padB);
+        tctx.strokeStyle = "rgba(36,64,106,.22)";
+        tctx.lineWidth = 1;
+        tctx.stroke();
+      }
+      tctx.restore();
+
+      const { minY, maxY, days } = trendModel;
+
+      function yOf(v){
+        const t = (v - minY) / (maxY - minY);
+        return (h - padB) - t * (h - padT - padB);
+      }
+      function xOf(i){
+        const n = days.length;
+        if (n === 1) return padL + (w - padL - padR) / 2;
+        return padL + (w - padL - padR) * (i/(n-1));
+      }
+
+      // 轴标注（Y：3档）
+      tctx.save();
+      tctx.font = '700 12px "JetBrains Mono", monospace';
+      tctx.fillStyle = "rgba(159,181,198,.90)";
+      const ticks = 3;
+      for (let i=0;i<=ticks;i++){
+        const v = minY + (maxY - minY) * (i/ticks);
+        const y = yOf(v);
+        tctx.fillText(`${Math.round(v)}°`, 8, y+4);
+      }
+      tctx.restore();
+
+      // X 轴日期（7个）
+      tctx.save();
+      tctx.font = '800 12px "JetBrains Mono", monospace';
+      tctx.fillStyle = "rgba(159,181,198,.92)";
+      for (let i=0;i<days.length;i++){
+        const x = xOf(i);
+        const y = h - 12;
+        const txt = days[i].label.replace("月","/").replace("日","");
+        const tw = tctx.measureText(txt).width;
+        tctx.fillText(txt, x - tw/2, y);
+      }
+      tctx.restore();
+
+      // 计算点
+      trendModel.pointsMax = days.map((d,i) => ({ x: xOf(i), y: yOf(d.tmax), v: d.tmax, i }));
+      trendModel.pointsMin = days.map((d,i) => ({ x: xOf(i), y: yOf(d.tmin), v: d.tmin, i }));
+
+      // 画线（霓虹：shadowBlur）
+      function drawLine(points, stroke, shadow){
+        tctx.save();
+        tctx.lineWidth = 2.6;
+        tctx.lineJoin = "round";
+        tctx.lineCap = "round";
+        tctx.strokeStyle = stroke;
+        tctx.shadowColor = shadow;
+        tctx.shadowBlur = 16;
+        tctx.beginPath();
+        points.forEach((p, idx) => {
+          if (idx === 0) tctx.moveTo(p.x, p.y);
+          else tctx.lineTo(p.x, p.y);
+        });
+        tctx.stroke();
+        tctx.restore();
+      }
+
+      // 实线：最高（青）
+      drawLine(trendModel.pointsMax, "rgba(0,231,255,.95)", "rgba(0,231,255,.55)");
+      // 虚线：最低（粉）
+      tctx.save();
+      tctx.setLineDash([8,6]);
+      drawLine(trendModel.pointsMin, "rgba(255,43,214,.88)", "rgba(255,43,214,.50)");
+      tctx.restore();
+
+      // 点
+      function drawPoints(points, fill, shadow){
+        tctx.save();
+        tctx.shadowColor = shadow;
+        tctx.shadowBlur = 18;
+        points.forEach(p => {
+          tctx.beginPath();
+          tctx.arc(p.x, p.y, 3.8, 0, Math.PI*2);
+          tctx.fillStyle = fill;
+          tctx.fill();
+          // 外圈
+          tctx.beginPath();
+          tctx.arc(p.x, p.y, 7.2, 0, Math.PI*2);
+          tctx.strokeStyle = "rgba(255,255,255,.08)";
+          tctx.lineWidth = 1;
+          tctx.stroke();
+        });
+        tctx.restore();
+      }
+      drawPoints(trendModel.pointsMax, "rgba(0,231,255,.95)", "rgba(0,231,255,.45)");
+      drawPoints(trendModel.pointsMin, "rgba(255,43,214,.90)", "rgba(255,43,214,.40)");
+
+      // 如果当前是预报模式，高亮选中日
+      if (selectedDayIndex >= 0 && selectedDayIndex < days.length){
+        const pmx = trendModel.pointsMax[selectedDayIndex];
+        const pmn = trendModel.pointsMin[selectedDayIndex];
+        tctx.save();
+        tctx.globalAlpha = 0.65;
+        tctx.beginPath();
+        tctx.moveTo(pmx.x, padT);
+        tctx.lineTo(pmx.x, h - padB);
+        tctx.strokeStyle = "rgba(0,231,255,.18)";
+        tctx.lineWidth = 2;
+        tctx.stroke();
+        tctx.restore();
+
+        // 更亮一点的点
+        tctx.save();
+        tctx.shadowBlur = 22;
+        tctx.shadowColor = "rgba(0,231,255,.70)";
+        tctx.beginPath(); tctx.arc(pmx.x, pmx.y, 5.2, 0, Math.PI*2);
+        tctx.fillStyle = "rgba(0,231,255,1)";
+        tctx.fill();
+        tctx.shadowColor = "rgba(255,43,214,.65)";
+        tctx.beginPath(); tctx.arc(pmn.x, pmn.y, 5.2, 0, Math.PI*2);
+        tctx.fillStyle = "rgba(255,43,214,1)";
+        tctx.fill();
+        tctx.restore();
+      }
+    }
+
+    function showTooltip(x, y, html){
+      tooltipEl.innerHTML = html;
+      tooltipEl.style.left = `${x}px`;
+      tooltipEl.style.top  = `${y}px`;
+      tooltipEl.style.opacity = "1";
+    }
+    function hideTooltip(){
+      tooltipEl.style.opacity = "0";
+    }
+
+    function nearestPoint(mx, my){
+      if (!trendModel) return null;
+      const pts = [...trendModel.pointsMax, ...trendModel.pointsMin];
+      let best = null;
+      let bestD = Infinity;
+      for (const p of pts){
+        const dx = mx - p.x;
+        const dy = my - p.y;
+        const d2 = dx*dx + dy*dy;
+        if (d2 < bestD){
+          bestD = d2;
+          best = p;
         }
       }
-      if (!cnt) return null;
-      return sum / cnt;
+      return bestD <= (16*16) ? best : null;
     }
 
-    // ✅ 新增：渲染 7 天按钮
-    function renderDayButtons(){
-      const daily = weatherCache.daily;
-      if (!daily?.time?.length){
-        dayButtonsEl.innerHTML = "";
-        forecastStatusEl.textContent = "预报数据不足（接口未返回 daily）。";
-        return;
-      }
+    trendCanvas.addEventListener("mousemove", (e) => {
+      if (!trendModel) return;
+      const r = trendCanvas.getBoundingClientRect();
+      const mx = e.clientX - r.left;
+      const my = e.clientY - r.top;
+      const p = nearestPoint(mx, my);
+      if (!p){ hideTooltip(); return; }
+      const d = trendModel.days[p.i];
+      const isMax = trendModel.pointsMax.some(pm => pm.i === p.i && pm.x === p.x && pm.y === p.y && pm.v === p.v);
+      const label = isMax ? "最高" : "最低";
+      const html = `${d.label} · ${d.desc}<span class="sub">${label}：${Math.round(p.v)}°C</span>`;
+      showTooltip(p.x, p.y, html);
+    });
+    trendCanvas.addEventListener("mouseleave", hideTooltip);
+    trendCanvas.addEventListener("click", (e) => {
+      // ✅ 可选交互：点击节点附近，切到对应日期预报
+      if (!trendModel) return;
+      const r = trendCanvas.getBoundingClientRect();
+      const mx = e.clientX - r.left;
+      const my = e.clientY - r.top;
+      const p = nearestPoint(mx, my);
+      if (!p) return;
+      selectedDayIndex = p.i;
+      updateActiveTab();
+      renderByMode();
+    });
 
-      const times = daily.time.slice(0,7);
-      dayButtonsEl.innerHTML = times.map((t, idx) => {
-        const code = daily.weather_code?.[idx];
-        const brief = weatherText(code).replace(/（.*?）/g,""); // 简化一点
-        const md = fmtZhMD(t);
-        return `
-          <button class="day-btn" type="button" data-idx="${idx}" aria-label="${md} ${brief}">
-            <span class="day-dot"></span>
-            <span>${md} · ${brief}</span>
-          </button>
-        `;
-      }).join("");
-
-      forecastStatusEl.textContent = "点击日期按钮查看详细预报（默认展示实时天气）。";
-
-      // 绑定点击
-      [...dayButtonsEl.querySelectorAll(".day-btn")].forEach(btn => {
-        btn.addEventListener("click", () => {
-          const idx = Number(btn.dataset.idx);
-          selectDaily(idx);
-        });
-      });
-
-      // ✅ 默认不激活（保持实时模式）
-      clearActiveButtons();
-    }
-
-    function clearActiveButtons(){
-      [...dayButtonsEl.querySelectorAll(".day-btn")].forEach(b => b.classList.remove("active"));
-    }
-
-    function setActiveButton(idx){
-      clearActiveButtons();
-      const btn = dayButtonsEl.querySelector(`.day-btn[data-idx="${idx}"]`);
-      if (btn) btn.classList.add("active");
-    }
-
-    // ✅ 切换到某一天的预报展示（不破坏 Canvas：只切换 setAnim）
-    function selectDaily(idx){
-      const daily = weatherCache.daily;
-      if (!daily?.time?.length) return;
-      if (idx < 0 || idx >= Math.min(7, daily.time.length)) return;
-
-      viewMode = "daily";
-      selectedDayIndex = idx;
-      setActiveButton(idx);
-
-      const dayIso = daily.time[idx];
-      const code = daily.weather_code?.[idx];
-      const text = weatherText(code);
-
-      const tmax = daily.temperature_2m_max?.[idx];
-      const tmin = daily.temperature_2m_min?.[idx];
-      const windMax = daily.wind_speed_10m_max?.[idx];
-      const windDir = daily.wind_direction_10m_dominant?.[idx];
-      const popMax = daily.precipitation_probability_max?.[idx];
-      const precipSum = daily.precipitation_sum?.[idx];
-
-      // 湿度：用 hourly 平均值补齐（若有）
-      const humAvg = calcDailyAvgHumidity(dayIso);
-
-      // ✅ 让粒子特效随预报日变化（但不重排布局）
-      setAnim(code, windMax);
-
-      // ✅ 顶部主温度：用当天最高温；下方显示高/低范围
-      tempEl.textContent = fmt(tmax, 0);
-      rangeLineEl.textContent = `预报温度：最高 ${fmt(tmax,0)}° / 最低 ${fmt(tmin,0)}°`;
-
-      // ✅ 描述 + badge + 更新时间文案改为“预报日期”
-      descEl.textContent = `${fmtZhMD(dayIso)} · ${text} · 温度范围 ${fmt(tmin,0)}°C ~ ${fmt(tmax,0)}°C。`;
-      updatedEl.textContent = `预报日期：${fmtZhMD(dayIso)}（${dayIso}）`;
-      setBadge(`● 预报：${text}`, "ok");
-
-      // ✅ 指标区：优先展示预报关键项（实时项给出合理兜底）
-      apparentEl.textContent = `-- °C`;
-      windEl.textContent = `${fmt(windMax, 0)} km/h ${windDirText(windDir)}`;
-      humidityEl.textContent = humAvg == null ? "-- %" : `${fmt(humAvg,0)} %`;
-      pressureEl.textContent = `-- hPa`;
-      precipEl.textContent = `${fmt(precipSum, 1)} mm`;
-      cloudEl.textContent = `-- %`;
-      visibilityEl.textContent = `-- km`;
-      uvEl.textContent = `--`;
-
-      popEl.textContent = popMax == null ? "-- %" : `${fmt(popMax,0)} %`;
-      hiLoEl.textContent = `${fmt(tmax,0)} / ${fmt(tmin,0)} °C`;
-
-      // ✅ 建议：用当天“最高温/最大风/降水”生成
-      adviceEl.innerHTML = makeAdvice({
-        code,
-        temp: tmax,
-        wind: windMax,
-        precip: precipSum,
-        uv: null,
-        visibilityKm: null
-      });
-
-      statusEl.textContent = "已切换到未来预报日（实时自动刷新仍在后台更新数据）。";
-    }
-
-    // ✅ 返回实时模式
-    function backToCurrent(){
-      viewMode = "current";
-      selectedDayIndex = -1;
-      clearActiveButtons();
-      rangeLineEl.textContent = ""; // 实时默认不显示范围
-      // 直接用缓存 current 重刷 UI（如果没有则重新 fetch）
-      if (weatherCache.current) {
-        renderCurrentFromCache();
-      } else {
-        fetchWeather();
-      }
-    }
-    backToNowBtn.addEventListener("click", backToCurrent);
-
-    // ✅ 将实时数据渲染为 UI（供返回实时/自动刷新使用）
-    function renderCurrentFromCache(){
-      const data = weatherCache;
+    function renderLiveFromPayload(data){
       const cur = data.current || {};
-      const hourly = data.hourly || {};
-
       const temp = cur.temperature_2m;
       const app = cur.apparent_temperature;
       const code = cur.weather_code;
@@ -1132,6 +1310,7 @@
       const windDir = cur.wind_direction_10m;
       const time = cur.time;
 
+      // 优先从 current
       let humidity = cur.relative_humidity_2m;
       let pressure = cur.pressure_msl;
       let precip = cur.precipitation;
@@ -1139,7 +1318,8 @@
       let visibility = cur.visibility;
       let uv = cur.uv_index;
 
-      // 兜底：用 hourly 最近时间点补齐
+      // 兜底 hourly 最近时间点
+      const hourly = data.hourly || {};
       const times = hourly.time || [];
       const idx = findClosestTimeIndex(times, time);
 
@@ -1150,22 +1330,18 @@
       if (visibility == null && idx >= 0) visibility = hourly.visibility?.[idx];
       if (uv == null && idx >= 0) uv = hourly.uv_index?.[idx];
 
+      // ✅ 粒子特效按当前展示模式决定（实时模式才用实时 code）
       setAnim(code, wind);
 
       tempEl.textContent = fmt(temp, 0);
       apparentEl.textContent = `${fmt(app, 0)} °C`;
       windEl.textContent = `${fmt(wind, 0)} km/h ${windDirText(windDir)}`;
-
       humidityEl.textContent = `${fmt(humidity, 0)} %`;
       pressureEl.textContent = `${fmt(pressure, 0)} hPa`;
       precipEl.textContent = `${fmt(precip, 1)} mm`;
       cloudEl.textContent = `${fmt(cloud, 0)} %`;
       visibilityEl.textContent = visibility == null ? "-- km" : `${fmt(visibility / 1000, 1)} km`;
       uvEl.textContent = fmt(uv, 1);
-
-      // ✅ 预报相关字段在实时模式下可显示为 --（或用今天的 daily 补充）
-      popEl.textContent = "-- %";
-      hiLoEl.textContent = "-- / -- °C";
 
       const text = weatherText(code);
       descEl.textContent = `${text} · 当前温度 ${fmt(temp, 0)}°C，体感 ${fmt(app, 0)}°C。`;
@@ -1179,18 +1355,133 @@
       setBadge(`● ${text}`, "ok");
     }
 
+    function renderForecastDetailsFromPayload(data, dayIndex){
+      const daily = data.daily || {};
+      const dates = daily.time || [];
+      if (!dates.length) return;
+
+      const i = Math.max(0, Math.min(dayIndex, dates.length - 1));
+      const dateIso = dates[i];
+
+      const tmax = daily.temperature_2m_max?.[i];
+      const tmin = daily.temperature_2m_min?.[i];
+      const code = daily.weather_code?.[i];
+      const windMax = daily.wind_speed_10m_max?.[i];
+      const precipProb = daily.precipitation_probability_max?.[i];
+      const precipSum = daily.precipitation_sum?.[i];
+      const uvMax = daily.uv_index_max?.[i];
+
+      // hourly 日均：湿度/能见度
+      const hourlyAgg = aggregateHourlyByDate(data.hourly);
+      const agg = hourlyAgg.get(dateIso) || {};
+      const humidityAvg = agg.humidityAvg;
+      const visibilityAvg = agg.visibilityAvg;
+
+      const desc = weatherText(code);
+      const label = formatCNDate(dateIso);
+
+      // ✅ 切换主展示为该天的“预报概览”
+      tempEl.textContent = `${fmt(tmax,0)}/${fmt(tmin,0)}`;
+      apparentEl.textContent = `--`;
+      windEl.textContent = `${fmt(windMax, 0)} km/h`;
+      humidityEl.textContent = humidityAvg == null ? "-- %" : `${fmt(humidityAvg, 0)} %`;
+      pressureEl.textContent = `-- hPa`;
+      precipEl.textContent = precipSum == null ? "-- mm" : `${fmt(precipSum, 1)} mm`;
+      cloudEl.textContent = `-- %`;
+      visibilityEl.textContent = visibilityAvg == null ? "-- km" : `${fmt(visibilityAvg/1000, 1)} km`;
+      uvEl.textContent = uvMax == null ? "--" : fmt(uvMax, 1);
+
+      descEl.textContent = `${label} · ${desc} · 最高 ${fmt(tmax,0)}°C / 最低 ${fmt(tmin,0)}°C。`;
+
+      // ✅ 粒子特效：按预报的 code + windMax
+      setAnim(code, windMax);
+
+      // ✅ 预报建议（用 tmax 近似 temp）
+      const visibilityKm = visibilityAvg == null ? null : (visibilityAvg/1000);
+      adviceEl.innerHTML = makeAdvice({
+        code,
+        temp: tmax,
+        wind: windMax,
+        precip: precipSum,
+        uv: uvMax,
+        visibilityKm
+      });
+
+      updatedEl.textContent = `预报日期：${label}（Asia/Shanghai）`;
+      setBadge(`● ${desc}`, "ok");
+
+      // ✅ 详情面板
+      detailHeadEl.innerHTML = `<b>预报详情：</b>${label} · ${desc}`;
+      dTempRangeEl.textContent = `${fmt(tmin,0)}°C ~ ${fmt(tmax,0)}°C`;
+      dWeatherEl.textContent = desc;
+      dWindMaxEl.textContent = `${fmt(windMax,0)} km/h`;
+      dHumidityAvgEl.textContent = humidityAvg == null ? "-- %" : `${fmt(humidityAvg,0)} %`;
+      dPrecipProbEl.textContent = precipProb == null ? "-- %" : `${fmt(precipProb,0)} %`;
+      dPrecipSumEl.textContent = precipSum == null ? "-- mm" : `${fmt(precipSum,1)} mm`;
+      dUvMaxEl.textContent = uvMax == null ? "--" : fmt(uvMax,1);
+      dVisibilityAvgEl.textContent = visibilityAvg == null ? "-- km" : `${fmt(visibilityAvg/1000,1)} km`;
+    }
+
+    function renderByMode(){
+      setModePill();
+
+      // 高亮图表选中日
+      drawTrend();
+
+      if (!lastWeatherPayload) return;
+
+      if (selectedDayIndex === -1){
+        // ✅ 实时展示：渲染实时 + 详情区保留提示/或显示今天预报也可以
+        renderLiveFromPayload(lastWeatherPayload);
+
+        // 详情区：默认可展示“今天预报”（更有用）
+        const daily = lastWeatherPayload.daily || {};
+        const todayCode = daily.weather_code?.[0];
+        const todayDesc = weatherText(todayCode);
+        const todayIso = daily.time?.[0];
+        if (todayIso){
+          detailHeadEl.innerHTML = `<b>今日预报：</b>${formatCNDate(todayIso)} · ${todayDesc}（实时展示仍为上方实时数据）`;
+          // 复用渲染函数（但不改变主 UI）——这里仅填详情卡片
+          // 简化：直接填详情指标
+          const tmax = daily.temperature_2m_max?.[0];
+          const tmin = daily.temperature_2m_min?.[0];
+          const windMax = daily.wind_speed_10m_max?.[0];
+          const precipProb = daily.precipitation_probability_max?.[0];
+          const precipSum = daily.precipitation_sum?.[0];
+          const uvMax = daily.uv_index_max?.[0];
+
+          const hourlyAgg = aggregateHourlyByDate(lastWeatherPayload.hourly);
+          const agg = hourlyAgg.get(todayIso) || {};
+          const humidityAvg = agg.humidityAvg;
+          const visibilityAvg = agg.visibilityAvg;
+
+          dTempRangeEl.textContent = `${fmt(tmin,0)}°C ~ ${fmt(tmax,0)}°C`;
+          dWeatherEl.textContent = todayDesc;
+          dWindMaxEl.textContent = `${fmt(windMax,0)} km/h`;
+          dHumidityAvgEl.textContent = humidityAvg == null ? "-- %" : `${fmt(humidityAvg,0)} %`;
+          dPrecipProbEl.textContent = precipProb == null ? "-- %" : `${fmt(precipProb,0)} %`;
+          dPrecipSumEl.textContent = precipSum == null ? "-- mm" : `${fmt(precipSum,1)} mm`;
+          dUvMaxEl.textContent = uvMax == null ? "--" : fmt(uvMax,1);
+          dVisibilityAvgEl.textContent = visibilityAvg == null ? "-- km" : `${fmt(visibilityAvg/1000,1)} km`;
+        }
+      } else {
+        // ✅ 预报展示：主 UI 切到该日预报
+        renderForecastDetailsFromPayload(lastWeatherPayload, selectedDayIndex);
+      }
+    }
+
     async function fetchWeather() {
       statusEl.textContent = "正在请求 Open-Meteo API…";
       setBadge("● 获取中", "info");
 
-      // ✅ 新增 daily= 未来 7 天预报数据（并保留原有 current/hourly）
+      // ✅ 同时拉 current + daily + hourly（用于 7 天按钮/折线图/湿度日均等）
       const url =
         "https://api.open-meteo.com/v1/forecast" +
         `?latitude=${encodeURIComponent(LAT)}` +
         `&longitude=${encodeURIComponent(LON)}` +
         "&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,relative_humidity_2m,pressure_msl,precipitation,cloud_cover,visibility,uv_index" +
         "&hourly=relative_humidity_2m,pressure_msl,precipitation,cloud_cover,visibility,uv_index" +
-        "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,wind_speed_10m_max,wind_direction_10m_dominant" +
+        "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,wind_speed_10m_max,uv_index_max" +
         "&forecast_days=7" +
         "&timezone=Asia%2FShanghai";
 
@@ -1200,36 +1491,42 @@
         const res = await fetch(url, { cache: "no-store" });
         if (!res.ok) throw new Error("网络请求失败：" + res.status);
         const data = await res.json();
+        lastWeatherPayload = data;
 
-        // ✅ 缓存
-        weatherCache.current = data.current || null;
-        weatherCache.hourly = data.hourly || null;
-        weatherCache.daily = data.daily || null;
+        // ✅ 组装 7 天按钮数据
+        const daily = data.daily || {};
+        const dates = (daily.time || []).slice(0,7);
+        const days = dates.map((iso, i) => {
+          const code = daily.weather_code?.[i];
+          const desc = weatherText(code);
+          return {
+            date: iso,
+            label: formatCNDate(iso),
+            code,
+            desc,
+            tmax: daily.temperature_2m_max?.[i],
+            tmin: daily.temperature_2m_min?.[i]
+          };
+        });
 
-        // ✅ 渲染 7 天按钮 + 折线图
-        renderDayButtons();
-        drawTrendChartFromDaily();
+        buildDayTabs(days);
+        buildTrendModel(days);
 
-        // ✅ 如果当前处于“预报日”，保持选中并刷新该日数据；否则刷新实时
-        if (viewMode === "daily" && selectedDayIndex >= 0) {
-          selectDaily(selectedDayIndex);
-        } else {
-          viewMode = "current";
-          selectedDayIndex = -1;
-          rangeLineEl.textContent = "";
-          renderCurrentFromCache();
-        }
+        // ✅ 图表初始化
+        resizeTrendCanvas();
+        drawTrend();
+
+        // ✅ 按当前模式渲染（默认实时）
+        renderByMode();
 
         const t1 = performance.now();
         statusEl.textContent = `数据加载成功（耗时 ${Math.round(t1 - t0)} ms）。`;
-        forecastStatusEl.textContent = "预报已更新：可点击日期查看详细信息，也可返回实时。";
       } catch (err) {
         console.error(err);
         statusEl.textContent = "获取失败：可能是网络限制或接口不可用。你可以稍后重试。";
         descEl.textContent = "当前无法加载实时天气数据。请检查网络或刷新页面。";
         adviceEl.innerHTML = "<b>出行建议：</b>当前无法生成建议（数据未加载）。";
         setBadge("● 获取失败", "warn");
-        forecastStatusEl.textContent = "预报模块不可用（接口失败）。";
       }
     }
 
@@ -1250,6 +1547,12 @@
       setupAuto();
     });
 
+    backToLiveBtn.addEventListener("click", () => {
+      selectedDayIndex = -1;
+      updateActiveTab();
+      renderByMode();
+    });
+
     el("year").textContent = new Date().getFullYear();
 
     requestAnimationFrame(() => {
@@ -1258,220 +1561,19 @@
       step();
     });
 
-    /* =========================================================
-       ✅ 7 天折线图（Canvas）实现：最高/最低两条线 + hover tooltip
-       ========================================================= */
-    let trendState = {
-      points: [], // {x,yHi,yLo,dayIso,hi,lo,code}
-      hi: [],
-      lo: [],
-      days: [],
-      codes: []
-    };
-
-    function resizeTrendCanvas(){
-      const rect = trendWrap.getBoundingClientRect();
-      const w = Math.max(1, rect.width);
-      const h = Math.max(1, trendCanvas.getBoundingClientRect().height);
-      const dpr2 = Math.max(1, window.devicePixelRatio || 1);
-      trendCanvas.width = Math.round(w * dpr2);
-      trendCanvas.height = Math.round(h * dpr2);
-      const tctx = trendCanvas.getContext("2d");
-      tctx.setTransform(dpr2,0,0,dpr2,0,0);
-      // 重新绘制
-      drawTrendChart();
-    }
-
-    function drawTrendChartFromDaily(){
-      const daily = weatherCache.daily;
-      if (!daily?.time?.length) return;
-
-      const n = Math.min(7, daily.time.length);
-      trendState.days = daily.time.slice(0,n);
-      trendState.hi = (daily.temperature_2m_max || []).slice(0,n).map(Number);
-      trendState.lo = (daily.temperature_2m_min || []).slice(0,n).map(Number);
-      trendState.codes = (daily.weather_code || []).slice(0,n).map(Number);
-
-      // 尺寸准备 + 绘制
-      resizeTrendCanvas();
-    }
-
-    function drawTrendChart(){
-      const daily = trendState.days;
-      const hi = trendState.hi;
-      const lo = trendState.lo;
-      if (!daily?.length || !hi?.length || !lo?.length) return;
-
-      const ctx2 = trendCanvas.getContext("2d");
-      const w = trendWrap.getBoundingClientRect().width;
-      const h = trendCanvas.getBoundingClientRect().height;
-
-      ctx2.clearRect(0,0,w,h);
-
-      // 画布内边距
-      const padL = 34, padR = 16, padT = 18, padB = 28;
-      const innerW = Math.max(1, w - padL - padR);
-      const innerH = Math.max(1, h - padT - padB);
-
-      // y 范围：留余量
-      const all = hi.concat(lo).filter(v => Number.isFinite(v));
-      if (!all.length) return;
-      let yMin = Math.min(...all);
-      let yMax = Math.max(...all);
-      const margin = Math.max(2, (yMax - yMin) * 0.18);
-      yMin -= margin;
-      yMax += margin;
-
-      const xAt = (i) => padL + (innerW * (daily.length === 1 ? 0.5 : i/(daily.length-1)));
-      const yAt = (v) => padT + (1 - (v - yMin)/(yMax - yMin)) * innerH;
-
-      // 背景微光网格
-      ctx2.save();
-      ctx2.globalAlpha = 0.55;
-      ctx2.strokeStyle = "rgba(0,231,255,0.12)";
-      ctx2.lineWidth = 1;
-      const gridY = 4;
-      for (let j=0;j<=gridY;j++){
-        const yy = padT + (innerH * j/gridY);
-        ctx2.beginPath();
-        ctx2.moveTo(padL, yy);
-        ctx2.lineTo(padL + innerW, yy);
-        ctx2.stroke();
-      }
-      ctx2.restore();
-
-      // X 轴日期标注（简洁：月日）
-      ctx2.save();
-      ctx2.fillStyle = "rgba(210,240,255,0.70)";
-      ctx2.font = '600 12px "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
-      ctx2.textAlign = "center";
-      ctx2.textBaseline = "top";
-      for (let i=0;i<daily.length;i++){
-        const xx = xAt(i);
-        ctx2.fillText(fmtZhMD(daily[i]).replace("月","/").replace("日",""), xx, padT + innerH + 8);
-      }
-      ctx2.restore();
-
-      // 计算点位并缓存用于 hover
-      trendState.points = daily.map((dayIso, i) => {
-        return {
-          i,
-          x: xAt(i),
-          yHi: yAt(hi[i]),
-          yLo: yAt(lo[i]),
-          dayIso,
-          hi: hi[i],
-          lo: lo[i],
-          code: trendState.codes[i]
-        };
-      });
-
-      // 绘制函数：折线 + 光晕
-      function drawLine(which){
-        const isHi = which === "hi";
-        const getY = (p) => isHi ? p.yHi : p.yLo;
-
-        ctx2.save();
-        ctx2.lineWidth = 2;
-        ctx2.strokeStyle = isHi ? "rgba(0,231,255,0.92)" : "rgba(255,43,214,0.80)";
-        ctx2.shadowColor = isHi ? "rgba(0,231,255,0.35)" : "rgba(255,43,214,0.28)";
-        ctx2.shadowBlur = 14;
-
-        ctx2.beginPath();
-        trendState.points.forEach((p, idx) => {
-          const y = getY(p);
-          if (idx === 0) ctx2.moveTo(p.x, y);
-          else ctx2.lineTo(p.x, y);
-        });
-        ctx2.stroke();
-        ctx2.restore();
-
-        // 节点
-        ctx2.save();
-        trendState.points.forEach((p) => {
-          const y = getY(p);
-          // 外光
-          ctx2.beginPath();
-          ctx2.fillStyle = isHi ? "rgba(0,231,255,0.22)" : "rgba(255,43,214,0.20)";
-          ctx2.arc(p.x, y, 7, 0, Math.PI*2);
-          ctx2.fill();
-
-          // 内核
-          ctx2.beginPath();
-          ctx2.fillStyle = isHi ? "rgba(0,231,255,0.92)" : "rgba(255,43,214,0.86)";
-          ctx2.arc(p.x, y, 3.2, 0, Math.PI*2);
-          ctx2.fill();
-        });
-        ctx2.restore();
-      }
-
-      // 先画最低，再画最高（层级更好看）
-      drawLine("lo");
-      drawLine("hi");
-
-      // 左侧温度刻度（简洁 3 个）
-      ctx2.save();
-      ctx2.fillStyle = "rgba(210,240,255,0.65)";
-      ctx2.font = '600 12px "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
-      ctx2.textAlign = "right";
-      ctx2.textBaseline = "middle";
-      const ticks = 3;
-      for (let t=0;t<=ticks;t++){
-        const vv = yMin + (yMax-yMin) * (1 - t/ticks);
-        const yy = yAt(vv);
-        ctx2.fillText(`${Math.round(vv)}°`, padL - 8, yy);
-      }
-      ctx2.restore();
-    }
-
-    function nearestPoint(x, y){
-      let best = null;
-      let bestD = Infinity;
-      for (const p of trendState.points){
-        // 对两条线都算：取最近的节点（hi/lo 里更近的那个）
-        const d1 = Math.hypot(x - p.x, y - p.yHi);
-        const d2 = Math.hypot(x - p.x, y - p.yLo);
-        const d = Math.min(d1, d2);
-        if (d < bestD){
-          bestD = d;
-          best = p;
-        }
-      }
-      return (best && bestD <= 26) ? best : null;
-    }
-
-    function showTip(p, x, y){
-      const md = fmtZhMD(p.dayIso);
-      const brief = weatherText(p.code).replace(/（.*?）/g,"");
-      trendTip.innerHTML = `
-        <div><b>${md}</b> · ${brief}</div>
-        <div class="row"><span class="hi">高 ${fmt(p.hi,0)}°C</span><span class="lo">低 ${fmt(p.lo,0)}°C</span></div>
-      `;
-      trendTip.style.left = `${x}px`;
-      trendTip.style.top = `${y}px`;
-      trendTip.style.display = "block";
-    }
-    function hideTip(){
-      trendTip.style.display = "none";
-    }
-
-    trendWrap.addEventListener("mousemove", (e) => {
-      const rect = trendWrap.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const p = nearestPoint(x, y);
-      if (!p) { hideTip(); return; }
-      showTip(p, x, y);
-    });
-    trendWrap.addEventListener("mouseleave", hideTip);
-
-    // 初始化
-    requestAnimationFrame(() => {
-      resizeTrendCanvas();
-    });
-
+    // ✅ 首次加载
     fetchWeather();
     setupAuto();
   </script>
+
+  <!-- ✅ GitHub Pages 发布提示（只在源代码里说明，不影响页面） -->
+  <!--
+    GitHub Pages 发布要点：
+    1) 将此文件命名为 index.html 放到仓库根目录（或 /docs 目录）
+    2) 确保 CSS 路径可访问：你当前的 link 是 /mnt/data/...（本地/沙盒路径）
+       - 发布到 GitHub Pages 时请把 css 文件放到仓库里，例如 /assets/style.css
+       - 然后把 <link rel="stylesheet" href="/mnt/data/xxx.css"> 改为 <link rel="stylesheet" href="./assets/style.css">
+    3) 仓库 Settings -> Pages -> Deploy from branch -> 选择 main / (root 或 /docs)
+  -->
 </body>
 </html>
