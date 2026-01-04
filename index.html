@@ -32,7 +32,6 @@
       overflow:hidden;
     }
 
-    /* canvas 覆盖卡片 */
     #fxCanvas{
       position:absolute;
       inset:0;
@@ -43,7 +42,6 @@
       filter: saturate(1.2) contrast(1.05);
     }
 
-    /* 全天气通用：能量场光晕 */
     .wx-anim::before{
       content:"";
       position:absolute;
@@ -57,7 +55,6 @@
       opacity:.95;
     }
 
-    /* 旋转霓虹能量环 */
     .ring{
       position:absolute;
       left:50%;
@@ -77,7 +74,6 @@
       animation: ringSpin 10s linear infinite;
     }
 
-    /* 云雾光场（多云/阴/雷暴更明显） */
     .mist{
       position:absolute;
       inset:-30% -30%;
@@ -90,7 +86,6 @@
       animation: mistDrift 8s ease-in-out infinite alternate;
     }
 
-    /* 雷暴闪光层 */
     .flash{
       position:absolute;
       inset:0;
@@ -101,10 +96,8 @@
       display:none;
     }
 
-    /* 内容层 */
     .wx-content{ position:relative; z-index:1; }
 
-    /* ====== 头部居中 + 大标题 ====== */
     .weather-head{
       display:flex;
       flex-direction:column;
@@ -176,7 +169,6 @@
       text-align:center;
     }
 
-    /* 出行建议 */
     .advice{
       margin: 10px 0 18px;
       padding:12px 14px;
@@ -247,7 +239,6 @@
       text-align:center;
     }
 
-    /* ===== 动画关键帧 ===== */
     @keyframes energyFloat{
       from{ transform: translate(-2%, -1%) scale(1); }
       to  { transform: translate(2%, 1%) scale(1.06); }
@@ -267,7 +258,6 @@
       97%{ opacity:.98; }
     }
 
-    /* ====== 按天气增强层 ====== */
     .wx-clear .ring{ opacity:.55; }
     .wx-clouds .ring{ opacity:.36; }
     .wx-overcast .ring{ opacity:.20; filter: blur(9px); }
@@ -418,7 +408,7 @@
 
     let fxMode = "clear";
     let fxWind = 0;
-    let fxIntensity = 1; // 1~3
+    let fxIntensity = 1;
     let dpr = Math.max(1, window.devicePixelRatio || 1);
 
     const particles = [];
@@ -426,8 +416,10 @@
 
     function resizeCanvas(){
       const r = canvas.getBoundingClientRect();
-      canvas.width = Math.round(r.width * dpr);
-      canvas.height = Math.round(r.height * dpr);
+      const w = Math.max(1, r.width);
+      const h = Math.max(1, r.height);
+      canvas.width  = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr,0,0,dpr,0,0);
     }
     window.addEventListener("resize", resizeCanvas);
@@ -437,7 +429,6 @@
     function spawn(){
       const w = canvas.getBoundingClientRect().width;
       const h = canvas.getBoundingClientRect().height;
-
       const count = Math.floor(7 * fxIntensity);
 
       if (fxMode === "rain" || fxMode === "thunder"){
@@ -474,7 +465,7 @@
             a: rand(0.03, 0.085)
           });
         }
-      } else { // clear
+      } else {
         for (let i=0;i<count;i++){
           particles.push({
             x: rand(0, w),
@@ -544,7 +535,6 @@
 
           if (p.y > h+40 || p.x < -60 || p.x > w+60) particles.splice(i,1);
         }
-
         else if (fxMode === "snow"){
           p.t += 1;
           const tw = (Math.sin(p.t * p.tw) + 1) * 0.5;
@@ -559,7 +549,6 @@
 
           if (p.y > h+24) particles.splice(i,1);
         }
-
         else if (fxMode === "fog" || fxMode === "clouds" || fxMode === "overcast"){
           p.x += p.vx;
           p.y += p.vy;
@@ -575,8 +564,7 @@
 
           if (p.x > w+160) p.x = -160;
         }
-
-        else { // clear
+        else {
           p.t += 1;
           const tw = (Math.sin(p.t * p.tw) + 1) * 0.5;
           p.x += p.vx;
@@ -650,9 +638,11 @@
       if (cls === "wx-clouds") return "clouds";
       return "clear";
     }
+
     function setAnim(code, wind){
       const cls = animClassByCode(code);
       animEl.className = `wx-anim ${cls}`;
+      resizeCanvas();
       setFx(fxModeByClass(cls), wind);
     }
 
@@ -687,15 +677,36 @@
       return `<b>出行建议：</b>${text}`;
     }
 
+    // ✅ 新增：找 hourly.time 里“最接近 current.time”的索引（兜底用）
+    function findClosestTimeIndex(times, targetIso){
+      if (!Array.isArray(times) || !times.length || !targetIso) return -1;
+      const target = Date.parse(targetIso);
+      if (!Number.isFinite(target)) return -1;
+
+      let best = 0;
+      let bestDiff = Infinity;
+      for (let i=0;i<times.length;i++){
+        const t = Date.parse(times[i]);
+        if (!Number.isFinite(t)) continue;
+        const diff = Math.abs(t - target);
+        if (diff < bestDiff){
+          bestDiff = diff;
+          best = i;
+        }
+      }
+      return bestDiff === Infinity ? -1 : best;
+    }
+
     async function fetchWeather() {
       statusEl.textContent = "正在请求 Open-Meteo API…";
       setBadge("● 获取中", "info");
 
+      // ✅ 修复关键：把湿度/气压/降水/云量/能见度/UV 放进 current= 直接拿
       const url =
         "https://api.open-meteo.com/v1/forecast" +
         `?latitude=${encodeURIComponent(LAT)}` +
         `&longitude=${encodeURIComponent(LON)}` +
-        "&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m" +
+        "&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,relative_humidity_2m,pressure_msl,precipitation,cloud_cover,visibility,uv_index" +
         "&hourly=relative_humidity_2m,pressure_msl,precipitation,cloud_cover,visibility,uv_index" +
         "&timezone=Asia%2FShanghai";
 
@@ -714,23 +725,33 @@
         const windDir = cur.wind_direction_10m;
         const time = cur.time;
 
+        // ✅ 优先从 current 取这些值
+        let humidity = cur.relative_humidity_2m;
+        let pressure = cur.pressure_msl;
+        let precip = cur.precipitation;
+        let cloud = cur.cloud_cover;
+        let visibility = cur.visibility;
+        let uv = cur.uv_index;
+
+        // ✅ 兜底：如果 current 没返回，就用 hourly 最近时间点补齐
         const hourly = data.hourly || {};
         const times = hourly.time || [];
-        const idx = times.indexOf(time);
+        const idx = findClosestTimeIndex(times, time);
 
-        const humidity = idx >= 0 ? hourly.relative_humidity_2m?.[idx] : null;
-        const pressure = idx >= 0 ? hourly.pressure_msl?.[idx] : null;
-        const precip = idx >= 0 ? hourly.precipitation?.[idx] : null;
-        const cloud = idx >= 0 ? hourly.cloud_cover?.[idx] : null;
-        const visibility = idx >= 0 ? hourly.visibility?.[idx] : null;
-        const uv = idx >= 0 ? hourly.uv_index?.[idx] : null;
+        if (humidity == null && idx >= 0) humidity = hourly.relative_humidity_2m?.[idx];
+        if (pressure == null && idx >= 0) pressure = hourly.pressure_msl?.[idx];
+        if (precip == null && idx >= 0) precip = hourly.precipitation?.[idx];
+        if (cloud == null && idx >= 0) cloud = hourly.cloud_cover?.[idx];
+        if (visibility == null && idx >= 0) visibility = hourly.visibility?.[idx];
+        if (uv == null && idx >= 0) uv = hourly.uv_index?.[idx];
 
-        // ✅ 切换炫酷动效
         setAnim(code, wind);
 
         tempEl.textContent = fmt(temp, 0);
         apparentEl.textContent = `${fmt(app, 0)} °C`;
         windEl.textContent = `${fmt(wind, 0)} km/h ${windDirText(windDir)}`;
+
+        // ✅ 现在这些值会稳定显示，不再是 --
         humidityEl.textContent = `${fmt(humidity, 0)} %`;
         pressureEl.textContent = `${fmt(pressure, 0)} hPa`;
         precipEl.textContent = `${fmt(precip, 1)} mm`;
@@ -778,14 +799,14 @@
 
     el("year").textContent = new Date().getFullYear();
 
-    // 初始化：先启动引擎，再拉天气
-    resizeCanvas();
-    setFx("clear", 0);
-    step();
+    requestAnimationFrame(() => {
+      resizeCanvas();
+      setFx("clear", 0);
+      step();
+    });
 
     fetchWeather();
     setupAuto();
   </script>
 </body>
 </html>
-
